@@ -32,3 +32,6 @@ Thumbs.db
 
 # Project specific
 *.log
+
+# Docker
+.env

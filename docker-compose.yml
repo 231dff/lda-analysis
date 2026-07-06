@@ -1,0 +1,49 @@
+# ============================================================
+# Docker Compose — LDA (Legal Document Analyzer)
+# ============================================================
+#
+# Usage:
+#   1. Copy .env.example to .env and fill in your keys
+#   2. docker compose up -d
+#   3. Open http://localhost:8501
+#
+# ============================================================
+
+version: "3.9"
+
+services:
+  lda:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lda-legal-analyzer:latest
+    container_name: lda
+    restart: unless-stopped
+    ports:
+      - "${STREAMLIT_PORT:-8501}:8501"
+    environment:
+      # --- Required: Supabase ---
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      # --- Required: Groq ---
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      # --- Optional overrides ---
+      - APP_NAME=${APP_NAME:-LDA}
+      - APP_ANALYSIS_LIMIT=${APP_ANALYSIS_LIMIT:-15}
+      - APP_SESSION_TIMEOUT_HOURS=${APP_SESSION_TIMEOUT_HOURS:-24}
+    volumes:
+      # Persist FAISS indexes and HuggingFace model cache between restarts
+      - lda_data:/app/data
+      # Optional: mount a custom secrets.toml instead of using env vars
+      # - ./.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  lda_data:
+    driver: local

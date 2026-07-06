@@ -1,0 +1,48 @@
+# ============================================================
+# .dockerignore — exclude from Docker build context
+# ============================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+venv/
+env/
+.venv/
+.env/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Secrets (never bake into image!)
+.streamlit/secrets.toml
+.env
+.env.local
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+*.md
