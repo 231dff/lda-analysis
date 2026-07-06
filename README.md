@@ -6,6 +6,7 @@ AI Agent to analyze legal documents, contracts, and agreements — providing det
   <a href="#-features">Features</a> |
   <a href="#%EF%B8%8F-tech-stack">Tech Stack</a> |
   <a href="#-installation">Installation</a> |
+  <a href="#-docker-deployment">Docker Deployment</a> |
   <a href="#-project-structure">Project Structure</a>
 </p>
 
@@ -41,6 +42,8 @@ AI Agent to analyze legal documents, contracts, and agreements — providing det
 
 ## 🚀 Installation
 
+> **✨ Prefer Docker?** Skip to [Docker Deployment](#-docker-deployment) — no Python setup needed.
+
 #### Requirements 📋
 
 - Python 3.8+
@@ -54,8 +57,8 @@ AI Agent to analyze legal documents, contracts, and agreements — providing det
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/lda.git
-cd lda
+git clone https://github.com/231dff/lda-analysis.git
+cd lda-analysis
 ```
 
 2. Install dependencies:
@@ -64,12 +67,21 @@ cd lda
 pip install -r requirements.txt
 ```
 
-3. Required environment variables (in `.streamlit/secrets.toml`):
+3. Configure environment variables:
+
+**Option A — Streamlit secrets** (`.streamlit/secrets.toml`):
 
 ```toml
 SUPABASE_URL = "your-supabase-url"
 SUPABASE_KEY = "your-supabase-key"
 GROQ_API_KEY = "your-groq-api-key"
+```
+
+**Option B — `.env` file** (copy from `.env.example`):
+
+```bash
+cp .env.example .env
+# Edit .env with your actual keys
 ```
 
 4. Set up Supabase database schema:
@@ -84,12 +96,85 @@ The application uses three tables: `users`, `chat_sessions`, and `chat_messages`
 streamlit run src/main.py
 ```
 
+## 🐳 Docker Deployment
+
+The easiest way to run LDA. No Python setup required — just Docker and your API keys.
+
+#### Quick Start 🚀
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/231dff/lda-analysis.git
+cd lda-analysis
+```
+
+2. Configure environment variables:
+
+```bash
+cp .env.example .env
+# Edit .env with your actual keys:
+#   SUPABASE_URL=https://your-project.supabase.co
+#   SUPABASE_KEY=your-supabase-anon-key
+#   GROQ_API_KEY=gsk_your_groq_api_key
+```
+
+3. Start the application:
+
+```bash
+docker compose up -d
+```
+
+4. Open your browser at [http://localhost:8501](http://localhost:8501)
+
+#### Useful Commands 📋
+
+```bash
+# View logs
+docker compose logs -f
+
+# Stop the application
+docker compose down
+
+# Rebuild after code changes
+docker compose up -d --build
+
+# Stop and remove persisted data (FAISS index + model cache)
+docker compose down -v
+```
+
+#### What's Included 📦
+
+- **Multi-stage Docker build** — keeps the image lean (~2 GB with models)
+- **Non-root user** — runs as `streamlit` user for security
+- **Health checks** — automatic container health monitoring
+- **Data persistence** — FAISS indexes and HuggingFace model cache survive restarts via Docker volume
+- **Auto-configuration** — `docker-entrypoint.sh` generates Streamlit secrets from environment variables at startup
+- **Pre-downloaded model** — `all-MiniLM-L6-v2` embeddings model baked into the image
+
+#### Customizing 🔧
+
+| Environment Variable | Default | Description |
+|---|---|---|
+| `SUPABASE_URL` | *(required)* | Your Supabase project URL |
+| `SUPABASE_KEY` | *(required)* | Your Supabase anon key |
+| `GROQ_API_KEY` | *(required)* | Your Groq API key |
+| `STREAMLIT_PORT` | `8501` | Host port to expose the app |
+| `APP_NAME` | `LDA` | Application display name |
+| `APP_ANALYSIS_LIMIT` | `15` | Max analyses per day |
+| `APP_SESSION_TIMEOUT_HOURS` | `24` | Session expiration time |
+
 ## 📁 Project Structure
 
 ```
-lda/
+lda-analysis/
 ├── requirements.txt
 ├── README.md
+├── Dockerfile
+├── docker-compose.yml
+├── docker-entrypoint.sh
+├── .env.example
+├── .dockerignore
 ├── src/
 │   ├── main.py                 # Application entry point; chat UI and session flow
 │   ├── auth/
